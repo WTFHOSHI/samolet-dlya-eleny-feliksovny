@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Самолётик для Елены Феликсовны</title>
+<meta name="description" content="Напиши одно пожелание Елене Феликсовне ко Дню учителя">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Neucha&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: зелёная доска сверху, на ней лежит тетрадный лист в клетку — это и есть форма. */
+:root{
+  --board:#2f4a3e;
+  --board-dark:#253c32;
+  --chalk:#eef0e8;
+  --chalk-dim:#b9c4b8;
+  --paper:#fdfcf7;
+  --grid:#d7e3ef;
+  --margin-line:#e3897f;
+  --ink:#1f2a44;
+  --ink-soft:#5a6480;
+  --pen:#2453c9;
+  --red:#c8372d;
+  --display:"Neucha","Comic Sans MS",cursive;
+  --body:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{
+  background:var(--board);
+  background-image:
+    radial-gradient(ellipse at 20% 10%,rgba(255,255,255,.06),transparent 55%),
+    radial-gradient(ellipse at 80% 70%,rgba(255,255,255,.04),transparent 50%);
+  color:var(--ink);
+  font-family:var(--body);
+  font-size:16px;
+  line-height:1.5;
+  padding-inline:16px;
+  padding-block:calc(env(safe-area-inset-top,0px) + 28px) calc(env(safe-area-inset-bottom,0px) + 40px);
+  overflow-x:hidden;
+}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+
+/* --- доска --- */
+.board-head{color:var(--chalk);text-align:left}
+.date{font-family:var(--display);font-size:1.15rem;color:var(--chalk-dim);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{
+  font-family:var(--display);font-weight:400;
+  font-size:clamp(2rem,8vw,2.9rem);line-height:1.08;margin:10px 0 8px;
+  text-wrap:balance;letter-spacing:.01em;
+  text-shadow:0 0 1px rgba(255,255,255,.5),0 0 8px rgba(255,255,255,.08);
+}
+.lead{margin:0;color:var(--chalk-dim);font-size:1rem;max-width:44ch}
+.lead b{color:var(--chalk);font-weight:500}
+
+/* --- тетрадный лист --- */
+.sheet{
+  position:relative;
+  background-color:var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:22px 22px;
+  background-position:-1px -1px;
+  border-radius:3px;
+  padding:26px 20px 24px 46px;
+  box-shadow:0 18px 40px rgba(0,0,0,.35),0 2px 0 rgba(0,0,0,.08);
+  transform:rotate(-.6deg);
+  transform-origin:50% 50%;
+}
+.sheet::before{ /* красные поля */
+  content:"";position:absolute;top:0;bottom:0;left:32px;width:2px;background:var(--margin-line);opacity:.8;
+}
+.sheet-title{font-family:var(--display);font-size:1.45rem;color:var(--pen);margin:0 0 4px;line-height:1.2}
+.sheet-sub{margin:0 0 18px;color:var(--ink-soft);font-size:.92rem}
+
+form{display:flex;flex-direction:column;gap:18px}
+.field{display:flex;flex-direction:column;gap:6px}
+label{font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+input[type=text],textarea{
+  font:inherit;font-family:var(--display);font-size:1.3rem;color:var(--pen);
+  background:rgba(255,255,255,.55);
+  border:none;border-bottom:2px solid #9fb2c9;border-radius:2px;
+  padding:6px 8px;width:100%;
+  transition:border-color .2s,background .2s;
+}
+textarea{min-height:170px;resize:vertical;line-height:1.45}
+input[type=text]:focus,textarea:focus{outline:none;border-bottom-color:var(--pen);background:rgba(255,255,255,.85)}
+input::placeholder,textarea::placeholder{color:#a3adc0}
+.counter{align-self:flex-end;font-size:.8rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.counter.warn{color:var(--red)}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+
+
+.error{margin:0;color:var(--red);font-size:.92rem;min-height:1.2em}
+
+button{
+  font-family:var(--display);font-size:1.35rem;
+  background:var(--pen);color:#fff;border:none;border-radius:10px;
+  padding:12px 20px;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  box-shadow:0 4px 0 #173a94;transition:transform .1s,box-shadow .1s,opacity .2s;
+}
+button:hover{transform:translateY(-1px)}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 #173a94}
+button:focus-visible{outline:3px solid #f2c94c;outline-offset:3px}
+button:disabled{opacity:.6;cursor:wait}
+button svg{width:26px;height:26px}
+
+/* --- после отправки --- */
+.done{display:none;text-align:center;color:var(--chalk);padding:30px 6px 10px}
+.done h2{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,7vw,2.4rem);margin:0 0 10px;line-height:1.15;text-wrap:balance}
+.done p{margin:0 auto;color:var(--chalk-dim);max-width:38ch}
+.done .stamp{display:inline-block;margin-top:22px;font-family:var(--display);font-size:1.6rem;color:var(--red);border:3px solid var(--red);border-radius:8px;padding:2px 14px;transform:rotate(-6deg);background:var(--paper)}
+.sent .done{display:block;animation:fadeUp .6s .9s both}
+
+/* лист складывается и улетает */
+.sent .sheet{animation:fold .7s ease-in forwards;pointer-events:none}
+@keyframes fold{
+  0%{transform:rotate(-.6deg) scale(1);opacity:1}
+  60%{transform:rotate(-8deg) scale(.35,.18);opacity:1}
+  100%{transform:rotate(-10deg) scale(.1,.06);opacity:0}
+}
+.plane{
+  position:fixed;left:50%;top:55%;width:90px;height:90px;
+  pointer-events:none;opacity:0;z-index:5;
+}
+.sent .plane{animation:fly 1.8s .55s cubic-bezier(.45,.05,.55,.95) forwards}
+@keyframes fly{
+  0%{opacity:0;transform:translate(-50%,0) rotate(-15deg) scale(.6)}
+  12%{opacity:1}
+  45%{transform:translate(-10vw,-14vh) rotate(-30deg) scale(1)}
+  100%{opacity:1;transform:translate(70vw,-70vh) rotate(-20deg) scale(.7)}
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.already .sheet{display:none}
+.already .done{display:block}
+
+footer{color:var(--chalk-dim);font-size:.8rem;text-align:center;opacity:.8}
+
+@media (prefers-reduced-motion:reduce){
+  .sent .sheet{animation:none;display:none}
+  .sent .plane{animation:none;display:none}
+  .sent .done{animation:none}
+}
+@media (max-width:420px){
+  .sheet{padding:22px 14px 20px 40px}
+  .sheet::before{left:28px}
+}
+</style>
+</head>
+<body>
+<main class="wrap" id="app">
+  <header class="board-head">
+    <div class="date"><span>5 октября</span><span>Классная работа</span></div>
+    <h1>Самолётик для Елены&nbsp;Феликсовны</h1>
+    <p class="lead">Завтра День учителя. Напиши <b>одно</b> пожелание нашему куратору: оно станет бумажным самолётиком на её столе.</p>
+  </header>
+
+  <section class="sheet" aria-labelledby="sheet-title">
+    <h2 class="sheet-title" id="sheet-title">Моё пожелание</h2>
+    <p class="sheet-sub">Одно от каждого. Подпиши имя и фамилию: Елена Феликсовна увидит, от кого самолётик.</p>
+
+    <form name="wishes" id="wish-form" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
+      <input type="hidden" name="form-name" value="wishes">
+      <p class="hp"><label>Не заполняй: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+
+      <div class="field">
+        <label for="name">Имя и фамилия</label>
+        <input type="text" id="name" name="name" maxlength="60" autocomplete="name" placeholder="Например, Максим Иванов" required>
+      </div>
+
+      <div class="field">
+        <label for="wish">Пожелание</label>
+        <textarea id="wish" name="wish" maxlength="400" placeholder="Елена Феликсовна, спасибо вам за…" required></textarea>
+        <span class="counter" id="counter">0 / 400</span>
+      </div>
+
+      <p class="error" id="error" role="alert"></p>
+
+      <button type="submit" id="send">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2 11.5 21.5 3l-6 18-4.2-7.3L2 11.5Z" fill="#fff"/><path d="M11.3 13.7 21.5 3" stroke="#173a94" stroke-width="1.2"/></svg>
+        Сложить и отправить
+      </button>
+    </form>
+  </section>
+
+  <section class="done" aria-live="polite">
+    <h2 id="done-title">Самолётик долетел!</h2>
+    <p id="done-text">Завтра Елена Феликсовна найдёт его у себя на столе. Спасибо, что поучаствовал.</p>
+    <span class="stamp">Отправлено</span>
+  </section>
+
+  <footer>ИС-25-3С · День учителя</footer>
+</main>
+
+<svg class="plane" viewBox="0 0 100 100" aria-hidden="true">
+  <path d="M6 52 94 14 64 88 48 62Z" fill="#fdfcf7"/>
+  <path d="M48 62 94 14 40 70Z" fill="#dfe6f0"/>
+  <path d="M40 70 48 62 52 80Z" fill="#c4cfde"/>
+  <path d="M6 52 94 14M48 62 94 14" stroke="#9fb2c9" stroke-width="1" fill="none"/>
+</svg>
+
+<script>
+(function(){
+  var KEY = "teacher-day-wish-sent";
+  var app = document.getElementById("app");
+  var form = document.getElementById("wish-form");
+  var wish = document.getElementById("wish");
+  var nameEl = document.getElementById("name");
+  var counter = document.getElementById("counter");
+  var errorEl = document.getElementById("error");
+  var btn = document.getElementById("send");
+
+  function store(get, val){
+    try{ return get ? localStorage.getItem(KEY) : localStorage.setItem(KEY, val); }catch(e){ return null; }
+  }
+
+  // Одно пожелание с устройства
+  if (store(true)) {
+    document.body.classList.add("already");
+    document.getElementById("done-title").textContent = "Твой самолётик уже улетел";
+    document.getElementById("done-text").textContent = "С этого устройства пожелание уже ушло. Завтра Елена Феликсовна его прочитает.";
+  }
+
+  wish.addEventListener("input", function(){
+    var n = wish.value.length;
+    counter.textContent = n + " / 400";
+    counter.classList.toggle("warn", n > 360);
+  });
+
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    errorEl.textContent = "";
+    var name = nameEl.value.trim();
+    var text = wish.value.trim();
+    if (name.length < 2) { errorEl.textContent = "Напиши своё имя и фамилию, чтобы мы не потеряли самолётик."; nameEl.focus(); return; }
+    if (text.length < 5) { errorEl.textContent = "Пожелание слишком короткое. Добавь пару слов."; wish.focus(); return; }
+
+    btn.disabled = true;
+    var data = new URLSearchParams(new FormData(form)).toString();
+    // Пожелания всегда принимает Netlify, даже если страница открыта с GitHub Pages
+    var onNetlify = /netlify\.app$/.test(location.hostname);
+    var url = onNetlify ? "/" : "https://samolet-dlya-eleny-feliksovny.netlify.app/";
+    fetch(url, { method:"POST", mode: onNetlify ? "same-origin" : "no-cors", headers:{ "Content-Type":"application/x-www-form-urlencoded" }, body:data })
+      .then(function(r){
+        if (onNetlify && !r.ok) throw new Error("status " + r.status);
+        store(false, "1");
+        window.scrollTo({ top:0, behavior:"smooth" });
+        document.body.classList.add("sent");
+        var sh=document.querySelector(".sheet");
+        setTimeout(function(){ sh.style.display="none"; }, 750);
+      })
+      .catch(function(){
+        btn.disabled = false;
+        errorEl.textContent = "Не получилось отправить. Проверь интернет и нажми ещё раз.";
+      });
+  });
+})();
+</script>
+</body>
+</html>
